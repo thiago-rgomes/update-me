@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import CurrencySelect from "./CurrencySelector";
+import { getDailyRates, getExchangeRate } from "../../services/currencyAPI";
 
 export default function ConverterForm() {
   const [amount, setAmount] = useState<number>(100);
@@ -16,59 +17,29 @@ export default function ConverterForm() {
     setToCurrency(fromCurrency);
   };
 
-  const getDailyRates = async () => {
-  try {
-    const res = await fetch("https://economia.awesomeapi.com.br/last/USD-BRL,BTC-USD");
-    const data = await res.json();
+    const fetchDailyRates = async () => {
+    const { usdToBrl, btcToUsd } = await getDailyRates();
+    setUsdToBrl(usdToBrl);
+    setBtcToUsd(btcToUsd);
+  };
 
-    const usdBrl = data["USDBRL"]?.bid;
-    const btcUsd = data["BTCUSD"]?.bid;
-
-    if (usdBrl) setUsdToBrl(parseFloat(usdBrl).toFixed(2));
-    if (btcUsd) setBtcToUsd(parseFloat(btcUsd).toFixed(2));
-  } catch (err) {
-    console.error("Error on fetch daily rates:", err);
-  }
-};
-
-
-  const getExchangeRate = async () => {
-    const API_URL = `https://economia.awesomeapi.com.br/last/${fromCurrency}-${toCurrency}`;
-
+  const fetchExchangeRate = async () => {
     if (isLoading) return;
     setIsLoading(true);
-
-    try {
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error("Something went wrong!");
-
-      const data = await response.json();
-      const pairKey = `${fromCurrency}${toCurrency}`;
-      const exchangeRate = data[pairKey]?.bid;
-
-      if (exchangeRate) {
-        const rate = (parseFloat(exchangeRate) * amount).toFixed(2);
-        setResult(`${amount} ${fromCurrency} = ${rate} ${toCurrency}`);
-      } else {
-        console.log(data);
-        setResult("Exchange rate not found.");
-      }
-    } catch (error) {
-      console.error(error);
-      setResult("Something went wrong!");
-    } finally {
-      setIsLoading(false);
-    }
+    const conversionResult = await getExchangeRate(fromCurrency, toCurrency, amount);
+    setResult(conversionResult);
+    setIsLoading(false);
   };
+
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    getExchangeRate();
+    fetchExchangeRate();
   };
 
   useEffect(() => {
-    getExchangeRate();
-    getDailyRates();
+    fetchExchangeRate();
+    fetchDailyRates();
   }, []);
 
   return (
