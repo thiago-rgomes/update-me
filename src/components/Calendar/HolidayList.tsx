@@ -20,7 +20,7 @@ export default function HolidayList({ holidays, year }: Props) {
             className="flex justify-between border-b border-white/10 "
           >
             <span>
-              {new Date(h.date).toLocaleDateString("pt-BR", {
+              {new Date(`${h.date}T12:00:00`).toLocaleDateString("pt-BR", {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric",
