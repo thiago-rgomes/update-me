@@ -2,7 +2,7 @@ type WeatherCardProps = {
   date: string;
   icon: string;
   temp: number;
-  description: string;
+  description?: string;
   isToday?: boolean;
 };
 

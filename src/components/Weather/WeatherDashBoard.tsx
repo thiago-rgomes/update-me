@@ -106,8 +106,6 @@ export default function WeatherDashboard() {
             <img src={`https:${current?.condition.icon}`} alt={current?.condition.text} className="w-12 h-12"/>
             <p className="text-xl font-bold mt-2">{current?.temp_c.toFixed(1)}°C</p>
           </div>
-          
-          <p className="capitalize">{current?.condition.text}</p>
         </div>       
 
         <div className="flex flex-col text-start self-end w-[180px]">
@@ -134,7 +132,6 @@ export default function WeatherDashboard() {
               }).replace(',', '')}
               icon={day.day.condition.icon}
               temp={day.day.maxtemp_c}
-              description={day.day.condition.text}
               isToday={isToday}
             />
           );

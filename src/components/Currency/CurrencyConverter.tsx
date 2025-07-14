@@ -109,12 +109,12 @@ export default function ConverterForm() {
           type="submit"
           className={`${
             isLoading ? "opacity-50 cursor-not-allowed" : ""
-          } text-gray-700 font-medium bg-white border border-gray-300 px-4 py-2 rounded hover:bg-gray-300 transition duration-200`}
+          } text-gray-700 font-medium bg-white border border-gray-300 px-4 py-2 rounded hover:bg-gray-300 transition duration-200 mt-4`}
         >
           Get Exchange Rate
         </button>
 
-        <p className="p-2 h-16 flex justify-center items-center rounded-md font-medium bg-white/10 border border-white/50 transition ease-in-out duration-200 hover:bg-white/20,">
+        <p className="p-2 h-16 flex justify-center items-center rounded-md font-medium bg-white/10 border border-white/50 transition ease-in-out duration-200 hover:bg-white/20 mt-2">
           {isLoading ? "Getting exchange rate..." : result}
         </p>
       </form>
