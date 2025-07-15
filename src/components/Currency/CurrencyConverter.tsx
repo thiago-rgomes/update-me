@@ -59,7 +59,7 @@ export default function ConverterForm() {
           <label className="text-lg font-medium">Enter Amount</label>
           <input
             type="number"
-            className="p-2 rounded-md bg-white/10 border border-white/50 transition ease-in-out duration-200"
+            className="p-2 rounded-md bg-white/10 border border-white/50 transition ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-100"
             value={amount}
             onChange={(e) => setAmount(Number(e.target.value))}
             required
