@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import WeatherCard from "./WeatherCard";
-import { getWeatherByCity, getForecastByCity } from "../../services/weatherAPI";
-import translateWindDir from "./TranslateWindDir";
-import { Wind } from "lucide-react";
+import { getWeatherIcon } from "../../utils/weatherIcon";
+import { getWeather } from "../../utils/weatherIcon";
 
 type WeatherCondition = {
   text: string;
@@ -10,10 +9,8 @@ type WeatherCondition = {
 };
 
 type CurrentWeather = {
-  temp_c: number;
-  condition: WeatherCondition;
-  wind_kph: number;
-  wind_dir: string;
+  temperature: number;
+  weathercode: number;
 };
 
 type ForecastDay = {
@@ -57,23 +54,53 @@ export default function WeatherDashboard() {
         const location = await getLocation();
         setCity(location);
 
-        const [currentData, forecastData] = await Promise.all([
-          getWeatherByCity(location),
-          getForecastByCity(location),
-        ]);
-        
-        const allDays: ForecastDay[] = forecastData.forecast.forecastday;
-        
-        const upcomingDays = allDays.filter((day) => {
-          const forecastDate = new Date(day.date);
-          const localToday = new Date();
-          return forecastDate >= new Date(localToday.toDateString());
+        const [lat, lon] = location.split(",");
+
+        const res = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&daily=temperature_2m_max,weathercode&timezone=auto`
+        );
+
+        const data = await res.json();
+
+        const forecastDays: ForecastDay[] = data.daily.time.map(
+          (date: string, i: number) => ({
+            date,
+            day: {
+              maxtemp_c: data.daily.temperature_2m_max[i],
+              avgtemp_c: data.daily.temperature_2m_max[i],
+              condition: getWeather(data.daily.weathercode[i]),
+            },
+          })
+        );
+
+        // Garantir que hoje aparece como primeiro
+        const upcoming = forecastDays.filter((f) => {
+          const d = new Date(f.date);
+          return d >= new Date(new Date().toDateString());
         });
-        
-        setCurrent(currentData.current);
-        setForecast(upcomingDays);
-        setCity(currentData.location.name);
-        
+
+        setForecast(upcoming);
+
+        const locRes = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=pt-BR`
+        );
+
+        const locData = await locRes.json();
+
+        setCity(
+          locData.address.city ||
+            locData.address.town ||
+            locData.address.village ||
+            locData.address.municipality ||
+            locData.address.state ||
+            locData.address.country ||
+            "Localização"
+        );
+
+        setCurrent({
+          temperature: data.current.temperature_2m,
+          weathercode: data.current.weathercode,
+        });
       } catch (err: any) {
         console.error(err);
         setError(err.message || "Error on loading weather data.");
@@ -96,40 +123,37 @@ export default function WeatherDashboard() {
     );
 
   return (
-    <div className="flex flex-col gap-14 bg-gradient-to-br bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg text-white w-full max-w-[800px]  mx-auto">
-      <div className="flex items-center text-center gap-18">
-
-        <div className="flex flex-col items-center w-[180px]">
+    <div className="flex flex-col gap-14 bg-gradient-to-br bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg text-white w-full max-w-[800px] mx-auto">
+      <div className="flex items-center justify-around text-center">
+        <div className="flex flex-row gap-20 items-center max-w-50%">
           <h2 className="text-2xl font-bold">{city}</h2>
-          
-          <div className="flex gap-4">
-            <img src={`https:${current?.condition.icon}`} alt={current?.condition.text} className="w-12 h-12"/>
-            <p className="text-xl font-bold mt-2">{current?.temp_c.toFixed(1)}°C</p>
-          </div>
-        </div>       
 
-        <div className="flex flex-col text-start self-end w-[180px]">
-          <div className="flex items-center gap-2">
-            <Wind className="w-5 h-5 text-white/80"></Wind>
-            <p className="font-semibold">Wind</p>
+          <div className="flex gap-1 self-start">
+            <img
+              src={getWeatherIcon(current?.weathercode || 1)}
+              alt="Condição do tempo"
+              className="w-12 h-12"
+            />
+            <p className="text-xl font-bold mt-3">
+              {current?.temperature?.toFixed(1)}°C
+            </p>
           </div>
-          
-          <p>{current?.wind_kph} km/h</p>
-          <p className="uppercase">{translateWindDir(current?.wind_dir || '')}</p>
         </div>
-        
-      </div>      
+      </div>
 
       <div className="flex gap-4 overflow-x-auto">
         {forecast.map((day, index) => {
-          const isToday = new Date(day.date).toDateString() === new Date().toDateString();
+          const isToday =
+            new Date(day.date).toDateString() === new Date().toDateString();
           return (
             <WeatherCard
               key={index}
-              date={new Date(day.date).toLocaleDateString("pt-BR", {
-                weekday: "short",
-                day: "numeric",
-              }).replace(',', '')}
+              date={new Date(day.date)
+                .toLocaleDateString("pt-BR", {
+                  weekday: "short",
+                  day: "numeric",
+                })
+                .replace(",", "")}
               icon={day.day.condition.icon}
               temp={day.day.maxtemp_c}
               isToday={isToday}

@@ -21,7 +21,7 @@ export default function WeatherCard({date, icon, temp, description, isToday = fa
         </div>
       )}
       <p className="text-sm">{date}</p>
-      <img src={`https:${icon}`} alt="icon" className="mx-auto" />
+      <img src={`${icon}`} alt="icon" className="mx-auto" />
       <p className="text-xl font-semibold">{temp.toFixed(1)}°C</p>
       <p className="text-xs capitalize">{description}</p>
     </div>

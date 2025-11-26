@@ -38,9 +38,9 @@ export default function MiniCalendar() {
   };
 
   return (
-    <main className="flex gap-8">
+    <main className="flex gap-8 max-h-full">
       <div className="w-full max-w-[400px] p-4 rounded-xl bg-white/10 backdrop-blur-md text-white mx-auto">
-        <div className="text-center mb-4 font-semibold">
+        <div className="text-center mt-4 mb-4 font-semibold">
           {new Date(currentYear, currentMonth).toLocaleDateString("pt-BR", {
             month: "long",
             year: "numeric",
@@ -65,11 +65,11 @@ export default function MiniCalendar() {
             return (
               <div
                 key={index}
-                className={`p-2 rounded transition-all ${
+                className={`p-2 max-w-9 max-h-9 rounded transition-all ${
                   isToday
-                    ? "bg-yellow-400 text-black font-bold"
+                    ? "border-1 border-yellow-500 font-bold"
                     : holiday
-                    ? "bg-red-500/80 font-bold text-white"
+                    ? "bg-blue-500/40 font-bold text-white"
                     : "opacity-80"
                 }`}
                 title={holiday?.name || ""}

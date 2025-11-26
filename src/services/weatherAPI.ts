@@ -1,24 +1,16 @@
-const API_KEY = "9c751a2497e7477d875115043251107";
-const BASE_URL = 'https://api.weatherapi.com/v1';
+import axios from "axios";
 
-async function fetchWeather(url: string) {
-  const res = await fetch(url);
+export async function getWeatherByCoords(lat: number, lon: number) {
+  const url = "https://api.open-meteo.com/v1/forecast";
 
-  if (!res.ok) {
-    throw new Error('Erro ao buscar dados do clima');
-  }
+  const params = {
+    latitude: lat,
+    longitude: lon,
+    current: "temperature_2m,weather_code,wind_speed_10m,wind_direction_10m",
+    daily: "weather_code,temperature_2m_max",
+    timezone: "auto",
+  };
 
-  return res.json();
-}
-
-export async function getWeatherByCity(city: string) {
-  if (!API_KEY) throw new Error('API KEY não configurada');
-  const url = `${BASE_URL}/current.json?key=${API_KEY}&q=${city}&lang=pt`;
-  return fetchWeather(url);
-}
-
-export async function getForecastByCity(city: string) {
-  if (!API_KEY) throw new Error('API KEY não configurada');
-  const url = `${BASE_URL}/forecast.json?key=${API_KEY}&q=${city}&days=7&lang=pt`;
-  return fetchWeather(url);
+  const { data } = await axios.get(url, { params });
+  return data;
 }

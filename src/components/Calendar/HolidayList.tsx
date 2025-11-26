@@ -11,7 +11,7 @@ type Props = {
 
 export default function HolidayList({ holidays, year }: Props) {
   return (
-    <div className="bg-white/10 backdrop-blur-md p-4 rounded-lg shadow-inner max-h-80 w-90 overflow-y-auto custom-scrollbar">
+    <div className="bg-white/10 backdrop-blur-md p-4 pt-2 rounded-lg shadow-inner w-90 overflow-y-auto custom-scrollbar">
       <h3 className="text-md font-semibold mb-2 text-center">Feriados {year}</h3>
       <ul className="space-y-1 text-sm">
         {holidays.map((h) => (

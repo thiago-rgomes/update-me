@@ -43,7 +43,7 @@ export default function ConverterForm() {
   }, []);
 
   return (
-    <main className="flex flex-col w-[600px] gap-6 max-w-sm mx-auto bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg">
+    <main className="flex flex-col gap-6 w-[450px] mx-auto bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg">
       <div className="flex flex-col items-center gap-2">
         <h2 className="text-3xl font-bold mb-4">Your Daily Rate</h2>
         <h3 className="font-bold">{new Date().toLocaleDateString()}</h3>
