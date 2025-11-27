@@ -32,15 +32,10 @@ export default function WeatherDashboard() {
   useEffect(() => {
     function getLocation(): Promise<string> {
       return new Promise((resolve, reject) => {
-        if (!navigator.geolocation) {
+        if (!navigator.geolocation)
           return reject("Geolocalização não suportada.");
-        }
-
         navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            resolve(`${latitude},${longitude}`);
-          },
+          (pos) => resolve(`${pos.coords.latitude},${pos.coords.longitude}`),
           () => reject("Permissão de localização negada.")
         );
       });
@@ -52,64 +47,67 @@ export default function WeatherDashboard() {
 
       try {
         const location = await getLocation();
-        setCity(location);
-
         const [lat, lon] = location.split(",");
 
-        const res = await fetch(
+        const weatherReq = fetch(
           `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&daily=temperature_2m_max,weathercode&timezone=auto`
-        );
+        ).then((r) => r.json());
 
-        const data = await res.json();
+        const weather = await weatherReq;
 
-        const forecastDays: ForecastDay[] = data.daily.time.map(
+        setCurrent({
+          temperature: weather.current.temperature_2m,
+          weathercode: weather.current.weathercode,
+        });
+
+        const forecastDays: ForecastDay[] = weather.daily.time.map(
           (date: string, i: number) => ({
             date,
             day: {
-              maxtemp_c: data.daily.temperature_2m_max[i],
-              avgtemp_c: data.daily.temperature_2m_max[i],
-              condition: getWeather(data.daily.weathercode[i]),
+              maxtemp_c: weather.daily.temperature_2m_max[i],
+              avgtemp_c: weather.daily.temperature_2m_max[i],
+              condition: getWeather(weather.daily.weathercode[i]),
             },
           })
         );
 
-        // Garantir que hoje aparece como primeiro
-        const upcoming = forecastDays.filter((f) => {
-          const d = new Date(f.date);
-          return d >= new Date(new Date().toDateString());
-        });
+        const upcoming = forecastDays.filter(
+          (f) => new Date(f.date) >= new Date(new Date().toDateString())
+        );
 
         setForecast(upcoming);
 
-        const locRes = await fetch(
+        fetch(
           `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=pt-BR`
-        );
-
-        const locData = await locRes.json();
-
-        setCity(
-          locData.address.city ||
-            locData.address.town ||
-            locData.address.village ||
-            locData.address.municipality ||
-            locData.address.state ||
-            locData.address.country ||
-            "Localização"
-        );
-
-        setCurrent({
-          temperature: data.current.temperature_2m,
-          weathercode: data.current.weathercode,
-        });
+        )
+          .then((r) => r.json())
+          .then((loc) => {
+            setCity(
+              loc.address.city ||
+                loc.address.town ||
+                loc.address.village ||
+                loc.address.municipality ||
+                loc.address.state ||
+                loc.address.country ||
+                "Localização"
+            );
+          });
       } catch (err: any) {
         console.error(err);
-        setError(err.message || "Error on loading weather data.");
+        setError(err.message || "Erro carregando clima.");
       } finally {
         setLoading(false);
       }
     }
 
     fetchData();
+
+    const interval = setInterval(() => {
+      console.log("🔄 Atualizando clima...");
+      fetchData();
+    }, 20 * 60 * 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (error)
@@ -154,8 +152,7 @@ export default function WeatherDashboard() {
 
       <div className="flex gap-4 overflow-x-auto justify-center">
         {loading
-          ?
-            [...Array(6)].map((_, i) => (
+          ? [...Array(6)].map((_, i) => (
               <div
                 key={i}
                 className="w-[96px] h-[144px] bg-white/20 rounded-2xl animate-pulse"
