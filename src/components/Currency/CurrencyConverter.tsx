@@ -47,8 +47,8 @@ export default function ConverterForm() {
       <div className="flex flex-col items-center gap-2">
         <h2 className="text-3xl font-bold mb-4">Your Daily Rate</h2>
         <h3 className="font-bold">{new Date().toLocaleDateString()}</h3>
-        <h3 className="self-start ml-[20%] font-bold text-xl">1 BRL = {usdToBrl ? `${usdToBrl} USD` : "Carregando..."}</h3>
-        <h3 className="self-start ml-[20%] font-bold text-xl">1 BTC = {btcToUsd ? `${btcToUsd} USD` : "Carregando..."}</h3>
+        <h3 className="self-start ml-[25%] font-bold text-xl">1 BRL = {usdToBrl ? `${usdToBrl} USD` : "Carregando..."}</h3>
+        <h3 className="self-start ml-[25%] font-bold text-xl">1 BTC = {btcToUsd ? `${btcToUsd} USD` : "Carregando..."}</h3>
       </div>
       <form
         className="flex flex-col gap-6"
